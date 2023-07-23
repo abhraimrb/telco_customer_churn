@@ -1,0 +1,57 @@
+schema: '2.0'
+stages:
+  data_process:
+    cmd: python source/data_process.py data/telecom_churn.csv
+    deps:
+    - path: data/telecom_churn.csv
+      md5: e1902a8595ec6389117c20e2d83f907d
+      size: 128783
+    - path: source/data_process.py
+      md5: f8ade05edfd3de1b96635481d0d2aed3
+      size: 887
+    params:
+      params.yaml:
+        data_process.split_ratio: 0.2
+    outs:
+    - path: processed_data
+      md5: b4086b69b0918fdb3580b5bf6701caf0.dir
+      size: 148175
+      nfiles: 2
+  train:
+    cmd: python source/train.py processed_data/out_train.csv model_dir/model.pkl
+    deps:
+    - path: processed_data/out_train.csv
+      md5: 9afc3319162dc1435ffb7d85e9f791bd
+      size: 118442
+    - path: source/train.py
+      hash: md5
+      md5: 8074beae771c8d2af4c96ec1755c320a
+      size: 1230
+    params:
+      params.yaml:
+        train.class_weight: balanced
+        train.max_depth: 5
+        train.min_samples_leaf: 1
+        train.min_samples_split: 2
+        train.n_estimators: 50
+    outs:
+    - path: model_dir/model.pkl
+      hash: md5
+      md5: 9ebf54ec003d2320057087b9ec76cd8d
+      size: 219386
+  evaluate:
+    cmd: python source/evaluate.py model_dir/model.pkl processed_data/out_test.csv
+    deps:
+    - path: model_dir/model.pkl
+      hash: md5
+      md5: 9ebf54ec003d2320057087b9ec76cd8d
+      size: 219386
+    - path: source/evaluate.py
+      hash: md5
+      md5: a92117f2c9da9ed59f843315a4fba535
+      size: 2400
+    outs:
+    - path: results/predictions_vs_actuals.csv
+      hash: md5
+      md5: af5e0736e1f6f66c67da17297528915e
+      size: 5244
